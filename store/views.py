@@ -5,12 +5,32 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms 
-from .forms import SignUpForm
+from .forms import SignUpForm, UpdateUserForm
 # Create your views here.
+
+def update_user(request):
+    if request.user.is_authenticated:
+        current_user = User.objects.get(id=request.user.id)
+        user_form = UpdateUserForm(request.POST or None, instance=current_user)
+
+        if user_form.is_valid():
+            user_form.save()
+
+            login(request, current_user)
+            messages.success(request,"User has been updated!!!")
+            return redirect('home')
+        return render(request,"update_user.html", { 'user_form':user_form })
+    else:
+        messages.success(request,"Log in to access the page!!")
+        return redirect('home')
+
+
+    #return render(request,'update_user.html', {})
+
 
 def category_summary(request):
     categories = Category.objects.all()
-    return render(request,'category_summary.html', { 'categories': categories })
+    return render(request,'category_summary.html', {"categories": categories})
 
 
 def category(request,foo):

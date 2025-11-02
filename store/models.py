@@ -1,6 +1,31 @@
 from django.db import models
 import datetime
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save 
 # Create your models here.
+
+
+#creating for customer profile
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE) #delete profile and stuff
+    date_modified = models.DateTimeField(User,auto_now=True)
+    phone = models.CharField(blank=True)
+    address1 = models.CharField(blank=True,max_length=200)
+    address2 = models.CharField(blank=True,max_length=200)
+    state = models.CharField(blank=True,max_length=200)
+    zipcode = models.CharField(blank=True,max_length=200)
+    country = models.CharField(blank=True,max_length=200)
+
+    def __str__(self):
+        # return super().__str__()
+        return self.user.username
+    
+def create_profile(sender,instance,created, **kwargs):
+    if created:
+        user_profile = Profile(user=instance)
+        user_profile.save()
+
+post_save.connect(create_profile, sender=User)  #automate profile
 
 #categories of product 
 class Category(models.Model):

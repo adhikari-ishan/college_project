@@ -16,6 +16,8 @@ class Profile(models.Model):
     city = models.CharField(max_length=100,blank=True)
     zipcode = models.CharField(blank=True,max_length=200)
     country = models.CharField(blank=True,max_length=200)
+    old_cart = models.CharField(blank=True,max_length=200,null=True)
+   
 
     def __str__(self):
         # return super().__str__()

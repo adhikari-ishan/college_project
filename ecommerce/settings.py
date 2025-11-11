@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     #external apps 
     'store',
     'cart',
+    'payment',
 ]
 
 MIDDLEWARE = [

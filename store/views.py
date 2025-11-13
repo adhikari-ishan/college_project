@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms 
 from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
+from payment.forms import ShippingForm
+from payment.models import ShippingAddress
 from django.db.models import Q #helps to search for multiple data from db
 import json
 from cart.cart import Cart
@@ -29,15 +31,24 @@ def search(request):
 
 def update_info(request):
     if request.user.is_authenticated:
-        # current_user = Profile.objects.get(user__id=request.user.id)
-        current_user, created = Profile.objects.get_or_create(user=request.user)
-        form = UserInfoForm(request.POST or None, instance=current_user)
+        #get ciuurent user info
+        current_user = Profile.objects.get(user__id=request.user.id)
+        # current_user, created = Profile.objects.get_or_create(user=request.user)
+        #get shipping user info
+        shipping_user = ShippingAddress.objects.get(user__id=request.user.id)
+        # shipping_user, created = ShippingAddress.objects.get_or_create(user=request.user)
 
-        if form.is_valid():
+        #get user form 
+        form = UserInfoForm(request.POST or None, instance=current_user)
+        #get shipping form 
+        shipping_form = ShippingForm(request.POST or None,instance=shipping_user)
+
+        if form.is_valid() or shipping_form.is_valid():
             form.save()
+            shipping_form.save()
             messages.success(request,"your info has been updated!!!")
             return redirect('home')
-        return render(request,"update_info.html", { 'form':form })
+        return render(request,"update_info.html", { 'form':form, 'shipping_form':shipping_form })
     else:
         messages.success(request,"Log in to access the page!!")
         return redirect('home')
@@ -122,7 +133,7 @@ def login_user(request):
             login(request, user)
 
             #for cart when logging in
-            current_user =  Profile.objects.get(user__id=request.user.id)
+            current_user =  Profile.objects.get(id=request.user.id)
             #gettting savef cart from database
             saved_cart = current_user.old_cart
             #converting db string into dictionary

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from store.models import Product
 
 # Create your models here.
 class ShippingAddress(models.Model):
@@ -19,3 +20,28 @@ class ShippingAddress(models.Model):
     
     def __str__(self):
         return f'Shipping Address - {str(self.id)}'
+    
+#creating order model
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)#foreign key
+    full_name = models.CharField(max_length=100)
+    email = models.CharField(max_length=100)
+    shipping_address = models.TextField(max_length=20000)
+    amount_paid = models.DecimalField(max_digits=100,decimal_places=2)
+    date_ordered = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Order - {str(self.id)}'
+
+#order items
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)#foreign key
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)#foreign key
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)#foreign key
+
+    quantity = models.PositiveBigIntegerField(default=1)
+    price = models.DecimalField(max_digits=100,decimal_places=2)
+
+
+    def __str__(self):
+        return f'Order Item - {str(self.id)}' 

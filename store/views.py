@@ -133,7 +133,10 @@ def login_user(request):
             login(request, user)
 
             #for cart when logging in
-            current_user =  Profile.objects.get(id=request.user.id)
+            # current_user =  Profile.objects.get(id=request.user.id)
+            current_user, created = Profile.objects.get_or_create(user=request.user)
+
+
             #gettting savef cart from database
             saved_cart = current_user.old_cart
             #converting db string into dictionary

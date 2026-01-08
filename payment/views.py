@@ -5,6 +5,7 @@ from payment.models import ShippingAddress, Order, OrderItem
 from django.contrib.auth.models import User
 from django.contrib import messages
 from store.models import Product
+import datetime
 
 # Create your views here.
 
@@ -14,6 +15,25 @@ def orders(request,pk):
         order = Order.objects.get(id=pk)
         #get the orders items 
         items = OrderItem.objects.filter(order=pk)
+        if request.POST:
+            status = request.POST['shipping_status']
+            #check if true or false 
+            if status == "true":
+                #get the order 
+                order = Order.objects.filter(id=pk)
+                #update the status
+                now = datetime.datetime.now()
+                order.update(shipped=True, date_shipped = now )
+            else:
+                #get the order 
+                order = Order.objects.filter(id=pk)
+                #update the status
+                order.update(shipped=False)
+            messages.success(request, "Shipping status updated")
+            return redirect('home')
+            
+
+
         return render(request, 'payment/orders.html',{"order" : order, "items" : items} )
     else:
         messages.success(request,"Accesss denied!")

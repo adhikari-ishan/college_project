@@ -4,7 +4,7 @@ from payment.forms import ShippingForm, PaymentForm
 from payment.models import ShippingAddress, Order, OrderItem
 from django.contrib.auth.models import User
 from django.contrib import messages
-from store.models import Product
+from store.models import Product, Profile
 import datetime
 
 # Create your views here.
@@ -46,7 +46,20 @@ def orders(request,pk):
 def not_shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped = False)
-
+        if request.POST:
+            status = request.POST['shipping_status']
+            num = request.POST['num']
+            #get the order
+            order = Order.objects.filter(id=num)
+           #daate and time
+            now = datetime.datetime.now()
+            #update order
+            order.update(shipped=True, date_shipped = now )
+            #redirect
+            messages.success(request, "Shipping status updated")
+            return redirect('home')
+            
+            
         return render(request, 'payment/not_shipped_dash.html', {"orders" : orders})
     else:
         messages.success(request,"Accesss denied!")
@@ -57,6 +70,19 @@ def not_shipped_dash(request):
 def shipped_dash(request):
     if request.user.is_authenticated and request.user.is_superuser:
         orders = Order.objects.filter(shipped = True)
+        if request.POST:
+            status = request.POST['shipping_status']
+            num = request.POST['num']
+            #get the order
+            order = Order.objects.filter(id=num)
+           #daate and time
+            now = datetime.datetime.now()
+            #update order
+            order.update(shipped=False, date_shipped = now )
+            #redirect
+            messages.success(request, "Shipping status updated")
+            return redirect('home')
+            
 
         return render(request, 'payment/shipped_dash.html', {"orders" : orders})
     else:
@@ -122,6 +148,11 @@ def process_order(request):
                 if key == "session_key":
                     #delete the key 
                     del request.session[key]
+
+            #delete old cart from db
+            current_user = Profile.objects.filter(user__id=request.user.id)
+            #delete old cart field from db
+            current_user.update(old_cart="")
 
 
             messages.success(request,"Ordered placed")
